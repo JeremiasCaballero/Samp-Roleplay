@@ -30,6 +30,8 @@ stock getName(playerid){
 	GetPlayerName(playerid, name_user, sizeof(name_user));
     return name_user;
 }
+
+
 stock loadData(playerid){
     new query[520];
     mysql_format(MySQL, query, sizeof(query),"SELECT money,level,posx,posy,posz,skin FROM `users` WHERE `name`='%s'", getName(playerid));
@@ -91,7 +93,6 @@ public savePlayerData(playerid){
     UserInfo[playerid][mail],
     UserInfo[playerid][skin],
     UserInfo[playerid][skin],
-    //phone
     13,
     0,
     UserInfo[playerid][money],
