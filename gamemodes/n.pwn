@@ -4,6 +4,7 @@
 #include <a_mysql>
 #include "YSI_Coding\y_hooks"
 #include <samp_bcrypt>
+#include <zcmd>
 // ======================= Defines ============================
 #define DEFAULT_COLOR       0xFFFFFF00
 // ======================== DataBase instance =========================
@@ -11,9 +12,11 @@ new MySQL:MySQL;
 // ======================== MODULES =========================
 #include "../modules/dataBase/connect.pwn"
 #include "../modules/entities/player.pwn"
+#include "../modules/inventory/inventory.pwn"
 #include "../modules/main/onPlayerConnect.pwn"
 #include "../modules/auth/register.pwn"
 #include "../modules/auth/login.pwn"
+#include "../modules/maps/entrada.pwn"
 // ===================== Forwars ==================== 
 forward cuadros(playerid);
 
@@ -28,7 +31,7 @@ main()
 }
 
 public OnPlayerConnect(playerid)
-{
+{ 
 	return 1;
 }
 public OnPlayerCommandText(playerid, cmdtext[])
@@ -66,7 +69,7 @@ public ColorJugadorDefault(playerid)
 }
 // set the player data
 public OnPlayerSpawn(playerid){
-	
+	CrearTextDraws();
 	if(UserInfo[playerid][logeado] == true){
 		ColorJugadorDefault(playerid);
 	    StopAudioStreamForPlayer(playerid);
@@ -78,4 +81,9 @@ public OnPlayerSpawn(playerid){
 		Kick(playerid);
 	}
 	return 1;
+}
+
+
+CMD:ir(playerid,params[]){
+	SetPlayerPos(playerid, 1389.513061, 1123.703125, 636.287475);
 }

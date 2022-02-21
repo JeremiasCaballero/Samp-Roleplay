@@ -9,7 +9,15 @@ stock showLogin(playerid){
  		mysql_pquery(MySQL, query, "loadLoginData","d", playerid);
         //Show the login dialog
 		print(query);
-        ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_PASSWORD, "{0080FF}Ingresar", "Bienvenido de nuevo {0080FF}'%s'{fffff} introduce tu contraseña para entrar.", "Login", "Exit"),
+		new isNameValid = nameValidator(playerid);
+		if(isNameValid == 0){
+			new string[86];
+			format(string,86, "Tu nombre debe ser Nombre_Apellido, porfavor vuelva a ingresar con un nombre valido.");
+			SendClientMessage(playerid, -1, string);
+		}
+		new welcome[100]; // TO:DO fijarse cuanto ocupa
+		format(welcome,sizeof(welcome), "{FFFFFF}Bienvenido de nuevo {00CCFF}%s{FFFFFF}, introduce tu contraseña para entrar.", getName(playerid));
+        ShowPlayerDialog(playerid, DIALOG_LOGIN, DIALOG_STYLE_PASSWORD, "{0080FF}Ingresar", welcome, "Login", "Exit"),
 		getName(playerid);
 }
 

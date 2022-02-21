@@ -6,7 +6,8 @@
 	"dependencies": [
 		"pawn-lang/YSI-Includes@5.x",
 		"pBlueG/SA-MP-MySQL",
-		"Sreyas-Sreelal/samp-bcrypt"
+		"Sreyas-Sreelal/samp-bcrypt",
+		"Southclaws/zcmd"
 	],
 	"local": true,
 	"runtime": {
