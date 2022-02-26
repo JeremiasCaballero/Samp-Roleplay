@@ -5,6 +5,7 @@ forward loadPlayerData(playerid);
 forward savePlayerData(playerid); // insert fist data
 forward saveData(playerid); // save the data when the player disconnect from server.
 forward nameValidator(playerid);
+forward setLastAccess(playerid);
 enum p_info
 {
     id,
@@ -21,7 +22,13 @@ enum p_info
     money,
     ipRegister[16],
     phone,
-    inventoryStatus
+    inventoryStatus,
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    second,
 };
 new UserInfo[MAX_PLAYERS][p_info];
 
@@ -37,13 +44,16 @@ stock getName(playerid){
 
 stock loadData(playerid){
     new query[520];
-    mysql_format(MySQL, query, sizeof(query),"SELECT money,level,posx,posy,posz,skin FROM `users` WHERE `name`='%s'", getName(playerid));
+    mysql_format(MySQL, query, sizeof(query),"SELECT id,money,level,posx,posy,posz,skin FROM `users` WHERE `name`='%s'", getName(playerid));
  	mysql_pquery(MySQL, query, "loadPlayerData","d", playerid);
 }
 // this callback load the player data.
 // Look the enums and compare this fuction with the data of enums.
 public loadPlayerData(playerid){
    // new int_dest;
+    print("cargando info de cuenta");
+    cache_get_value_name_int(0, "id" , UserInfo[playerid][id]);
+    printf("'%d'", UserInfo[playerid][id]);
     cache_get_value_name_int(0, "level" , UserInfo[playerid][level]);
     cache_get_value_float(0, "posx", UserInfo[playerid][posx]);
     cache_get_value_float(0, "posy", UserInfo[playerid][posy]);
@@ -55,6 +65,7 @@ public loadPlayerData(playerid){
     print("seteando");
     printf("'%d'", UserInfo[playerid][inventoryStatus]);
     printf("'%d'", UserInfo[playerid][money]);
+    getLastAccess(playerid);
     SetSpawnInfo(playerid, 0, UserInfo[playerid][skin], UserInfo[playerid][posx],UserInfo[playerid][posy],UserInfo[playerid][posz], 0.0000, 0,0,0,0,0,0);
     SpawnPlayer(playerid);
     return 1;
@@ -165,23 +176,66 @@ CMD:reiniciar(playerid, params[]){
     SendClientMessageToAll(-1 , "The server is about to restart");
     return 1;
 }
+/*
 CMD:guardar(playerid, params[]){
+    printf("'%d'", UserInfo[playerid][id]);
     new query[520];
     new year,month,day,hour,minute,second;
     gettime(hour, minute, second);
     getdate(year, month, day);
     new ip[16];
     GetPlayerIp(playerid, ip, sizeof(ip));
-    mysql_format(MySQL, query, sizeof(query), "INSERT INTO `user_access` VALUES('null','%e','0','%i','%i','%i','%i','%i','%i')",
+    mysql_format(MySQL, query, sizeof(query), "INSERT INTO `user_access` VALUES('null','%e','%i','%i','%i','%i','%i','%i','%i')",
     ip,
     year,
     month,
     day,
     hour,
     minute,
-    second
+    second,
+    UserInfo[playerid][id]
     );
     printf(query);
     mysql_tquery(MySQL, query);
     return 1;
+}
+*/
+stock getLastAccess(playerid){
+    print("===== obteniendo ultimo acesso ===============");
+    new query[200];
+    mysql_format(MySQL, query, sizeof(query),"SELECT year,month,day,hour,minute,second FROM `user_access` INNER JOIN `users` ON user_access.user_id = users.id WHERE users.name='%s'", 
+    getName(playerid)
+    );
+    printf(query);
+    mysql_pquery(MySQL, query, "setLastAccess","d", playerid);
+    //return 1;
+}
+
+public setLastAccess(playerid){
+    print("===== seteando ultimo acesso ===============");
+    cache_get_value_name_int(0, "year" , UserInfo[playerid][year]);
+    cache_get_value_name_int(0, "month" , UserInfo[playerid][month]);
+    cache_get_value_name_int(0, "day" , UserInfo[playerid][day]);
+    cache_get_value_name_int(0, "hour" , UserInfo[playerid][hour]);
+    cache_get_value_name_int(0, "minute" , UserInfo[playerid][minute]);
+    cache_get_value_name_int(0, "second" , UserInfo[playerid][second]);
+    welcomeMessage(playerid);
+    return 1;
+}
+
+
+
+stock welcomeMessage(playerid)
+{
+    new string[200];
+    format(string, 200, "Bienvenido de nuevo {00CCFF}%s{FFFFFF} te vimos por ultima vez el {00CCFF}%i-%i-%i{FFFFFF} a las {00CCFF}%i:%i:%i{FFFFFF}",
+    getName(playerid),
+    UserInfo[playerid][day],
+    UserInfo[playerid][month],
+    UserInfo[playerid][year],
+    UserInfo[playerid][hour],
+    UserInfo[playerid][minute],
+    UserInfo[playerid][second]
+    );
+    SendClientMessage(playerid, -1, string);
 }
