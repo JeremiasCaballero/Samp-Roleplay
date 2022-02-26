@@ -94,7 +94,25 @@ public saveData(playerid){
     );
     printf(query);
     mysql_tquery(MySQL, query);
-    printf("Se esta guardando la cuenta de %s",getName(playerid));       
+    printf("Se esta guardando la cuenta de %s",getName(playerid));
+    print("Guardando accesso");
+    new anio,mes,dia,hora,minuto,segundo;
+    gettime(hora, minuto, segundo);
+    getdate(anio, mes, dia);
+    new ip[16];
+    GetPlayerIp(playerid, ip, sizeof(ip));
+    mysql_format(MySQL, query, sizeof(query), "INSERT INTO `user_access` VALUES('null','%e','%i','%i','%i','%i','%i','%i','%i')",
+    ip,
+    anio,
+    mes,
+    dia,
+    hora,
+    minuto,
+    segundo,
+    UserInfo[playerid][id]
+    );
+    printf(query);
+    mysql_tquery(MySQL, query);       
     return 1;
 }
 public nameValidator(playerid){
@@ -160,6 +178,8 @@ public savePlayerData(playerid){
     );
     printf(query);
     mysql_tquery(MySQL, query);
+    
+    //new ip[16];
     return 1;
 }
 hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys){
@@ -171,35 +191,6 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys){
 	}
 	return 1;
 }
-CMD:reiniciar(playerid, params[]){
-    SendRconCommand("gmx");
-    SendClientMessageToAll(-1 , "The server is about to restart");
-    return 1;
-}
-/*
-CMD:guardar(playerid, params[]){
-    printf("'%d'", UserInfo[playerid][id]);
-    new query[520];
-    new year,month,day,hour,minute,second;
-    gettime(hour, minute, second);
-    getdate(year, month, day);
-    new ip[16];
-    GetPlayerIp(playerid, ip, sizeof(ip));
-    mysql_format(MySQL, query, sizeof(query), "INSERT INTO `user_access` VALUES('null','%e','%i','%i','%i','%i','%i','%i','%i')",
-    ip,
-    year,
-    month,
-    day,
-    hour,
-    minute,
-    second,
-    UserInfo[playerid][id]
-    );
-    printf(query);
-    mysql_tquery(MySQL, query);
-    return 1;
-}
-*/
 stock getLastAccess(playerid){
     print("===== obteniendo ultimo acesso ===============");
     new query[200];
@@ -238,4 +229,22 @@ stock welcomeMessage(playerid)
     UserInfo[playerid][second]
     );
     SendClientMessage(playerid, -1, string);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// COMMANDS
+CMD:reiniciar(playerid, params[]){
+    SendRconCommand("gmx");
+    SendClientMessageToAll(-1 , "The server is about to restart");
+    return 1;
 }
