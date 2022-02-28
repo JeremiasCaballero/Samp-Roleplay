@@ -5,10 +5,14 @@
 #include "YSI_Coding\y_hooks"
 #include <samp_bcrypt>
 #include <zcmd>
+#include <sscanf2>
+#include "YSI_Data/y_iterate"
 // ======================= Defines ============================
 #define DEFAULT_COLOR       0xFFFFFF00
 // ======================== DataBase instance =========================
 new MySQL:MySQL;
+// ===================== Constants ==================== 
+#include "../constants/constants.pwn"
 // ======================== MODULES =========================
 #include "../modules/dataBase/connect.pwn"
 #include "../modules/entities/player.pwn"
@@ -17,6 +21,8 @@ new MySQL:MySQL;
 #include "../modules/auth/register.pwn"
 #include "../modules/auth/login.pwn"
 #include "../modules/maps/entrada.pwn"
+#include "../modules/admin/admin.pwn"
+#include "../modules/doubtsChat/doubtsChat.pwn"
 // ===================== Forwars ==================== 
 forward cuadros(playerid);
 
@@ -76,14 +82,10 @@ public OnPlayerSpawn(playerid){
 	    SetPlayerScore(playerid, UserInfo[playerid][level]);
 	    SetPlayerSkin(playerid, UserInfo[playerid][skin]);
 		GivePlayerMoney(playerid,UserInfo[playerid][money]);
+		UserConfig[playerid][show_doubts_chat] = 1;
 	    SetPlayerPos(playerid, UserInfo[playerid][posx], UserInfo[playerid][posy], UserInfo[playerid][posz]);
 	}else{
 		Kick(playerid);
 	}
 	return 1;
-}
-
-
-CMD:ir(playerid,params[]){
-	SetPlayerPos(playerid, 1389.513061, 1123.703125, 636.287475);
 }
