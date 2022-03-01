@@ -1,7 +1,13 @@
 CMD:duda(playerid, params[]){
     new doubtText[71];
     if(!sscanf(params,"s[71]",doubtText)){
-        sendDoubt(playerid,doubtText);
+        if(UserConfig[playerid][show_doubts_chat] == 0){
+            new message[400];
+            format(message, 200, "{FFFFFF}Debes activar el canal de dudas para poder usarlo, utiliza {00CCFF}/config{FFFFFF} o {00CCFF}/configuracion{FFFFFF} para activarlo.");
+            SendClientMessage(playerid, -1, message);
+        }else{
+            sendDoubt(playerid,doubtText);
+        }
     }else SendClientMessage(playerid, -1, "utilize {DBED15}/duda <duda>{FFFFFF}, por ejemplo {DBED15}¿Comó veo mi inventario?{FFFFFF}.");
     return 1;
 }

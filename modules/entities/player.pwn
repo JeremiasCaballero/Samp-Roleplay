@@ -8,6 +8,8 @@ forward nameValidator(playerid);
 forward setLastAccess(playerid);
 forward setConfigPlayer(playerid);
 forward setPlayeridResult(playerid);
+
+forward OnQueryFinishData(playerid, typeConsult[]); // utilizada para obtener todas las consultas 
 // defines 
 
 #define DIALOG_CONFIG 7
@@ -50,39 +52,26 @@ stock getName(playerid){
     return name_user;
 }
 
-
-stock loadData(playerid){
+forward loadData(playerid);
+public loadData(playerid){
     new query[520];
+    new variant[] = "doubts";
+    mysql_format(MySQL, query, sizeof(query),"SELECT show_doubts_chat FROM `user_account_configuration` INNER JOIN `users` ON user_account_configuration.user_id = users.id WHERE users.name='Dylan_Lampwick'");
+    mysql_pquery(MySQL, query, "OnQueryFinishData", "is", playerid, variant);
+    
+    new variant2[] = "userData";
     mysql_format(MySQL, query, sizeof(query),"SELECT id,money,level,posx,posy,posz,skin,admin FROM `users` WHERE `name`='%s'", getName(playerid));
- 	mysql_pquery(MySQL, query, "loadPlayerData","d", playerid);
-}
-// this callback load the player data.
-// Look the enums and compare this fuction with the data of enums.
-public loadPlayerData(playerid){
-   // new int_dest;
-    print("cargando info de cuenta");
-    cache_get_value_name_int(0, "id" , UserInfo[playerid][id]);
-    printf("'%d'", UserInfo[playerid][id]);
-    cache_get_value_name_int(0, "level" , UserInfo[playerid][level]);
-    cache_get_value_float(0, "posx", UserInfo[playerid][posx]);
-    cache_get_value_float(0, "posy", UserInfo[playerid][posy]);
-    cache_get_value_float(0, "posz", UserInfo[playerid][posz]);
-    cache_get_value_int(0, "skin", UserInfo[playerid][skin]);
-    cache_get_value_int(0, "money", UserInfo[playerid][money]);
-    cache_get_value_int(0, "admin", UserInfo[playerid][admin]);
-    UserInfo[playerid][logeado] = true;
-    UserInfo[playerid][inventoryStatus] = 0;
-    print("seteando");
-    printf("'%d'", UserInfo[playerid][inventoryStatus]);
-    printf("'%d'", UserInfo[playerid][money]);
-    getLastAccess(playerid);
-    getConfigPlayer(playerid);
-    SetSpawnInfo(playerid, 0, UserInfo[playerid][skin], UserInfo[playerid][posx],UserInfo[playerid][posy],UserInfo[playerid][posz], 0.0000, 0,0,0,0,0,0);
-    SpawnPlayer(playerid);
+ 	mysql_pquery(MySQL, query, "OnQueryFinishData","is", playerid, variant2);
+
+
+    new variant3[] = "userAccess";
+
+    mysql_format(MySQL, query, sizeof(query),"SELECT year,month,day,hour,minute,second FROM `user_access` INNER JOIN `users` ON user_access.user_id = users.id WHERE users.name='%s'", 
+    getName(playerid)
+    );
+    mysql_pquery(MySQL, query, "OnQueryFinishData","is", playerid, variant3);
     return 1;
 }
-
-
 hook OnPlayerDisconnect(playerid, reason){
     if(UserInfo[playerid][logeado] == true){
         saveData(playerid);
@@ -124,9 +113,11 @@ public saveData(playerid){
     );
     printf(query);
     mysql_tquery(MySQL, query);    
-    mysql_format(MySQL, query, sizeof(query), "UPDATE `user_account_configuration` SET `show_doubts_chat`='%i' WHERE `user_account_configuration.user_id = '%i'",
+    mysql_format(MySQL, query, sizeof(query), "UPDATE `user_account_configuration` SET `show_doubts_chat` = '%i' WHERE `user_account_configuration`.`user_id` = '%i'",
     UserConfig[playerid][show_doubts_chat],
     UserInfo[playerid][id]);
+    printf(UserInfo[playerid][id]);
+    printf(query);
     mysql_tquery(MySQL, query);       
     return 1;
 }
@@ -207,17 +198,6 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys){
 	}
 	return 1;
 }
-stock getLastAccess(playerid){
-    print("===== obteniendo ultimo acesso ===============");
-    new query[200];
-    mysql_format(MySQL, query, sizeof(query),"SELECT year,month,day,hour,minute,second FROM `user_access` INNER JOIN `users` ON user_access.user_id = users.id WHERE users.name='%s'", 
-    getName(playerid)
-    );
-    printf(query);
-    mysql_pquery(MySQL, query, "setLastAccess","d", playerid);
-    //return 1;
-}
-
 stock getPlayerIdFromDataBase(playerid){
     print("Obteniendo id desde la base de datos");
     new query[200];
@@ -261,35 +241,6 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[]){
     }
     return 1;
 }
-
-public setLastAccess(playerid){
-    print("===== seteando ultimo acesso ===============");
-    cache_get_value_name_int(0, "year" , UserInfo[playerid][year]);
-    cache_get_value_name_int(0, "month" , UserInfo[playerid][month]);
-    cache_get_value_name_int(0, "day" , UserInfo[playerid][day]);
-    cache_get_value_name_int(0, "hour" , UserInfo[playerid][hour]);
-    cache_get_value_name_int(0, "minute" , UserInfo[playerid][minute]);
-    cache_get_value_name_int(0, "second" , UserInfo[playerid][second]);
-    welcomeMessage(playerid);
-    return 1;
-}
-
-stock getConfigPlayer(playerid){
-    print("===== obteniendo configuracion de usuario ===============");
-    new query[200];
-    mysql_format(MySQL, query, sizeof(query),"SELECT show_doubts_chat FROM `user_account_configuration` INNER JOIN `users` ON user_account_configuration.user_id = users.id WHERE users.name='%s'", 
-    getName(playerid)
-    );
-    printf(query);
-    mysql_pquery(MySQL, query, "setConfigPlayer","d", playerid);
-}
-
-public setConfigPlayer(playerid){
-    print("===== seteando configuracion player ===============");
-    cache_get_value_name_int(0, "show_doubts_chat" , UserConfig[playerid][show_doubts_chat]);
-    return 1;
-}
-
 stock welcomeMessage(playerid)
 {
     new string[200];
@@ -330,6 +281,44 @@ stock showConfigPlayerOptions(playerid) {
     ShowPlayerDialog(playerid, DIALOG_CONFIG, DIALOG_STYLE_TABLIST_HEADERS, "Configuracion de cuenta", message, "Cambiar", "Cerrar");
     return 1;
 }
+public OnQueryFinishData(playerid, typeConsult[]){
+    new doubts[] = "doubts";
+    new userData[] = "userData";
+    new userAccess[] = "userAccess";
 
 
+    if(!strcmp(doubts, typeConsult)) {
+        cache_get_value_name_int(0, "show_doubts_chat" , UserConfig[playerid][show_doubts_chat]);
+    }
+    if(!strcmp(userData, typeConsult)) {
+        cache_get_value_name_int(0, "id" , UserInfo[playerid][id]);
+        cache_get_value_name_int(0, "level" , UserInfo[playerid][level]);
+        cache_get_value_float(0, "posx", UserInfo[playerid][posx]);
+        cache_get_value_float(0, "posy", UserInfo[playerid][posy]);
+        cache_get_value_float(0, "posz", UserInfo[playerid][posz]);
+        cache_get_value_int(0, "skin", UserInfo[playerid][skin]);
+        cache_get_value_int(0, "money", UserInfo[playerid][money]);
+        cache_get_value_int(0, "admin", UserInfo[playerid][admin]);
+        UserInfo[playerid][logeado] = true;
+        UserInfo[playerid][inventoryStatus] = 0;
+        SetSpawnInfo(playerid, 0, UserInfo[playerid][skin], UserInfo[playerid][posx],UserInfo[playerid][posy],UserInfo[playerid][posz], 0.0000, 0,0,0,0,0,0);
+        SpawnPlayer(playerid);
+    }
+    if(!strcmp(userAccess, typeConsult)) {
+        cache_get_value_name_int(0, "year" , UserInfo[playerid][year]);
+        cache_get_value_name_int(0, "month" , UserInfo[playerid][month]);
+        cache_get_value_name_int(0, "day" , UserInfo[playerid][day]);
+        cache_get_value_name_int(0, "hour" , UserInfo[playerid][hour]);
+        cache_get_value_name_int(0, "minute" , UserInfo[playerid][minute]);
+        cache_get_value_name_int(0, "second" , UserInfo[playerid][second]);
+        welcomeMessage(playerid);
+    }
+    return 1;
+}
 
+CMD:ver(playerid, params[]){
+    new message[2];
+    format(message, 2, "%i", UserConfig[playerid][show_doubts_chat]);
+    SendClientMessage(playerid, -1, message);
+    return 1;
+}

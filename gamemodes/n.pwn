@@ -82,7 +82,6 @@ public OnPlayerSpawn(playerid){
 	    SetPlayerScore(playerid, UserInfo[playerid][level]);
 	    SetPlayerSkin(playerid, UserInfo[playerid][skin]);
 		GivePlayerMoney(playerid,UserInfo[playerid][money]);
-		UserConfig[playerid][show_doubts_chat] = 1;
 	    SetPlayerPos(playerid, UserInfo[playerid][posx], UserInfo[playerid][posy], UserInfo[playerid][posz]);
 	}else{
 		Kick(playerid);
